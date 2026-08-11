@@ -37,6 +37,7 @@ import {
   Smartphone,
   Loader2,
   Info,
+  PenSquare,
 } from "lucide-react";
 
 const STEPS = ["Basics", "Template", "Content", "Access", "Preview"];
@@ -70,6 +71,7 @@ export default function NewsletterEditor() {
   const { user, role } = useAuth();
   const { getNewsletter, createNewsletter, saveNewsletter, deleteNewsletter, updateNewsletterStatus, users, pushAudit } = useData();
   const isNew = !id;
+  const hasPublishAccess = role === "admin" || role === "owner";
 
   const [draft, setDraft] = useState<Newsletter>(() => emptyDraft(user.id));
   const [step, setStep] = useState(0);
@@ -86,30 +88,6 @@ export default function NewsletterEditor() {
     if (id && !isDataLoaded) {
       const existing = getNewsletter(id);
       if (existing) {
-        const hasPublishAccess = role === "admin" || role === "owner";
-        if (existing.status === "published" && !hasPublishAccess) {
-          const draftId = `${existing.id}_draft`;
-          const existingDraft = getNewsletter(draftId);
-          if (existingDraft) {
-            navigate(`/newsletters/${draftId}/edit`, { replace: true });
-          } else {
-            const clone = {
-              ...structuredClone(existing),
-              id: draftId,
-              status: "draft" as any,
-              title: `${existing.title} (Draft Edit)`,
-              publishDate: null,
-              scheduledFor: null,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            };
-            createNewsletter(clone).then(() => {
-              navigate(`/newsletters/${draftId}/edit`, { replace: true });
-            });
-          }
-          return;
-        }
-
         setDraft(structuredClone(existing));
         setSlugTouched(true);
         if (existing.scheduledFor) {
@@ -122,7 +100,7 @@ export default function NewsletterEditor() {
     } else if (!id) {
       setIsDataLoaded(true);
     }
-  }, [id, getNewsletter, isDataLoaded, role, navigate, createNewsletter]);
+  }, [id, getNewsletter, isDataLoaded]);
 
   const set = (patch: Partial<Newsletter>) => setDraft((d) => ({ ...d, ...patch }));
 
@@ -170,7 +148,6 @@ export default function NewsletterEditor() {
 
   const handleSaveDraft = async () => {
     if (!validateBasics()) { setStep(0); return; }
-    const hasPublishAccess = role === "admin" || role === "owner";
     const wasPublished = draft.status === "published";
     const nextStatus = (wasPublished && hasPublishAccess) ? "published" : "draft";
     
@@ -239,10 +216,76 @@ export default function NewsletterEditor() {
     mobile: "max-w-[360px]",
   };
 
+  const handleCreateRevisionDraft = async () => {
+    const draftId = `${draft.id}_draft`;
+    const existingDraft = getNewsletter(draftId);
+    if (existingDraft) {
+      navigate(`/newsletters/${draftId}/edit`);
+    } else {
+      toast.loading("Creating draft copy for revision...", { id: "clone-toast" });
+      const uniqueSlug = `${draft.slug}-draft-edit-${Math.random().toString(36).substring(2, 6)}`;
+      const clone = {
+        ...structuredClone(draft),
+        id: draftId,
+        status: "draft" as any,
+        slug: uniqueSlug,
+        title: `${draft.title} (Draft Edit)`,
+        publishDate: null,
+        scheduledFor: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      await createNewsletter(clone);
+      toast.success("Draft revision copy created", { id: "clone-toast" });
+      navigate(`/newsletters/${draftId}/edit`);
+    }
+  };
+
+  const isReadOnly = !isNew && draft.status === "published" && !hasPublishAccess;
+
   if (id && !isDataLoaded) {
     return (
       <div className="flex h-screen items-center justify-center bg-secondary/30">
         <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (isReadOnly) {
+    return (
+      <div className="flex h-screen flex-col bg-secondary/30">
+        <header className="flex h-14 items-center gap-3 border-b border-border bg-background px-4 shadow-sm">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/newsletters")}>
+            <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Newsletters</span>
+          </Button>
+          <div className="h-5 w-px bg-border" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">{draft.title}</p>
+          </div>
+          <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20">Published</Badge>
+          <Button size="sm" onClick={handleCreateRevisionDraft} className="flex gap-2">
+            <PenSquare className="size-4" /> Edit & Revise
+          </Button>
+        </header>
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-card p-8 shadow-card">
+            <div className="mb-4">
+              <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-accent-foreground">
+                {draft.category}
+              </span>
+            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">{draft.title}</h1>
+            {draft.subtitle && <p className="mt-2 text-lg text-muted-foreground">{draft.subtitle}</p>}
+            
+            {draft.coverImage && (
+              <img className="mt-6 aspect-video w-full rounded-xl object-cover border border-border shadow-soft" src={draft.coverImage} alt={draft.title} />
+            )}
+            
+            <div className="mt-8 border-t border-border pt-8 space-y-6">
+              <NewsletterPreview newsletter={draft} />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
