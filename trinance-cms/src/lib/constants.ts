@@ -32,8 +32,8 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", to: "/", icon: LayoutDashboard, roles: ["owner", "admin", "editor", "writer"] },
   { label: "Newsletters", to: "/newsletters", icon: Newspaper, roles: ["owner", "admin", "editor", "writer"] },
-  { label: "Subscribers", to: "/subscribers", icon: Users, roles: ["owner", "admin", "editor"] },
-  { label: "Analytics", to: "/analytics", icon: BarChart3, roles: ["owner", "admin", "editor"] },
+  { label: "Subscribers", to: "/subscribers", icon: Users, roles: ["owner", "admin"] },
+  { label: "Analytics", to: "/analytics", icon: BarChart3, roles: ["owner", "admin"] },
   { label: "Team", to: "/team", icon: UserCog, roles: ["owner", "admin"] },
   { label: "Settings", to: "/settings", icon: Settings, roles: ["owner", "admin"] },
 ];
@@ -110,10 +110,10 @@ export const ROLE_DESCRIPTION: Record<Role, string> = {
 
 /** Permission matrix used across the app for gating actions. */
 export const CAN = {
-  publish: (r: Role) => r === "owner" || r === "admin" || r === "editor",
-  viewSubscribers: (r: Role) => r !== "writer",
-  viewAnalytics: (r: Role) => r !== "writer",
+  publish: (r: Role) => r === "owner" || r === "admin",
+  viewSubscribers: (r: Role) => r === "owner" || r === "admin",
+  viewAnalytics: (r: Role) => r === "owner" || r === "admin",
   manageTeam: (r: Role) => r === "owner" || r === "admin",
   manageSettings: (r: Role) => r === "owner" || r === "admin",
-  deleteNewsletter: (r: Role) => r === "owner" || r === "admin" || r === "editor",
+  deleteNewsletter: (r: Role) => r === "owner" || r === "admin",
 };

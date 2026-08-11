@@ -238,7 +238,7 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
             return (
               <div className="stock-row" key={i}>
                 <div className="stock-info">
-                  <span className="stock-ticker">${item.ticker}</span>
+                  <span className="stock-ticker">₹{item.ticker}</span>
                   <span className="stock-note">{item.note}</span>
                 </div>
                 <span className={`stock-change ${changeClass}`}>{item.change}</span>

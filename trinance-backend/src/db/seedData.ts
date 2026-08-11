@@ -382,7 +382,7 @@ export const auditLog: AuditEntry[] = [
   { id: "a1", actorId: "u3", action: "published", target: "Markets rally as RBI holds rates steady", date: daysAgo(1) },
   { id: "a2", actorId: "u4", action: "scheduled", target: "Crypto Update: ETH staking yields compress", date: daysAgo(0) },
   { id: "a3", actorId: "u1", action: "invited", target: "divya@trinance.com (Writer)", date: daysAgo(6) },
-  { id: "a4", actorId: "u2", action: "updated plan", target: "Yearly — price changed to $99", date: daysAgo(8) },
+  { id: "a4", actorId: "u2", action: "updated plan", target: "Yearly — price changed to ₹99", date: daysAgo(8) },
   { id: "a5", actorId: "u3", action: "archived", target: "Weekly Wrap: Small-caps cool off", date: daysAgo(45) },
   { id: "a6", actorId: "u1", action: "disabled user", target: "rohan@trinance.com", date: daysAgo(40) },
   { id: "a7", actorId: "u5", action: "created draft", target: "Daily Market Brief — draft for Aug 8", date: daysAgo(0) },

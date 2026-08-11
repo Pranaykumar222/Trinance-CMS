@@ -94,7 +94,7 @@ export function PlansManager({ plans }: { plans: Plan[] }) {
           <div className="space-y-2">
             <Label htmlFor="price">Price ({editing?.duration})</Label>
             <div className="flex items-center rounded-lg border border-input bg-card px-3 shadow-soft focus-within:border-primary">
-              <span className="text-sm text-muted-foreground">$</span>
+              <span className="text-sm text-muted-foreground">₹</span>
               <input id="price" type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} className="h-9 flex-1 bg-transparent px-1 text-sm outline-none" />
             </div>
           </div>

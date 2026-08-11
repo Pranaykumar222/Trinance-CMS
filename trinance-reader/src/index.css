@@ -1,6 +1,6 @@
 :root {
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'EB Garamond', Georgia, serif;
+  --font-serif: 'EB Garamond', Georgia, serif;
   
   --bg-primary: #fcfcfd;
   --bg-card: #ffffff;

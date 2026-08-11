@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/popover";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useData } from "@/context/DataContext";
 import { ROLE_LABEL, ROLE_DESCRIPTION } from "@/lib/constants";
 import type { Role } from "@/types";
 import {
@@ -34,14 +35,7 @@ import {
   Check,
   Settings as SettingsIcon,
 } from "lucide-react";
-import { relativeTime } from "@/lib/utils";
-
-const NOTIFICATIONS = [
-  { id: 1, title: "Newsletter published", body: "‘Markets rally as RBI holds rates steady’ went live.", time: -30 },
-  { id: 2, title: "Scheduled send ready", body: "‘Crypto Update’ is scheduled for tomorrow 8:00 AM.", time: -120 },
-  { id: 3, title: "New paid subscriber", body: "Aditya Sharma upgraded to the Yearly plan.", time: -240 },
-  { id: 4, title: "Payment failed", body: "A Monthly renewal payment needs attention.", time: -900 },
-];
+import { cn, relativeTime } from "@/lib/utils";
 
 export function Topbar({
   onMenuClick,
@@ -54,8 +48,25 @@ export function Topbar({
 }) {
   const { user, role, switchRole, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { newsletters } = useData();
   const navigate = useNavigate();
   const roles: Role[] = ["owner", "admin", "editor", "writer"];
+
+  const isAdminOrOwner = role === "admin" || role === "owner";
+  const drafts = newsletters.filter((n) => n.status === "draft");
+
+  const notifications = [
+    ...(isAdminOrOwner ? drafts.map((d) => ({
+      id: `draft-${d.id}`,
+      title: "Draft Needs Review",
+      body: `“${d.title}” is ready for review.`,
+      dateVal: new Date(d.updatedAt),
+      isDraft: true,
+      idVal: d.id,
+    })) : []),
+    { id: "static-1", title: "New paid subscriber", body: "Aditya Sharma upgraded to the Yearly plan.", dateVal: new Date(Date.now() - 240 * 60000), isDraft: false, idVal: "" },
+    { id: "static-2", title: "Payment failed", body: "A Monthly renewal payment needs attention.", dateVal: new Date(Date.now() - 900 * 60000), isDraft: false, idVal: "" },
+  ];
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md lg:px-6">
@@ -89,16 +100,27 @@ export function Topbar({
           <PopoverContent align="end" className="w-80 p-0">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <p className="text-sm font-semibold">Notifications</p>
-              <Badge variant="secondary">{NOTIFICATIONS.length} new</Badge>
+              <Badge variant="secondary">{notifications.length} new</Badge>
             </div>
             <div className="max-h-80 overflow-y-auto">
-              {NOTIFICATIONS.map((n) => (
-                <div key={n.id} className="flex gap-3 border-b border-border px-4 py-3 last:border-0 hover:bg-secondary/50">
-                  <span className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
+              {notifications.map((n) => (
+                <div
+                  key={n.id}
+                  onClick={() => {
+                    if (n.isDraft) {
+                      navigate(`/newsletters/${n.idVal}`);
+                    }
+                  }}
+                  className={cn(
+                    "flex gap-3 border-b border-border px-4 py-3 last:border-0 hover:bg-secondary/50",
+                    n.isDraft && "cursor-pointer"
+                  )}
+                >
+                  <span className={cn("mt-1 size-2 shrink-0 rounded-full", n.isDraft ? "bg-warning" : "bg-primary")} />
                   <div className="space-y-0.5">
                     <p className="text-sm font-medium leading-tight">{n.title}</p>
                     <p className="text-xs text-muted-foreground">{n.body}</p>
-                    <p className="text-[11px] text-muted-foreground/70">{relativeTime(new Date(Date.now() + n.time * 60000))}</p>
+                    <p className="text-[11px] text-muted-foreground/70">{relativeTime(n.dateVal)}</p>
                   </div>
                 </div>
               ))}
