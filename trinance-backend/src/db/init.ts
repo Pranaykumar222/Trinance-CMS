@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { users, plans, newsletters, subscribers, auditLog } from "./seedData";
 
-async function main() {
+export async function initDatabase() {
   const hasDatabaseUrl = !!process.env.DATABASE_URL;
 
   if (!hasDatabaseUrl) {
@@ -127,10 +127,11 @@ async function main() {
   }
 
   console.log("Database seeded successfully!");
-  process.exit(0);
 }
 
-main().catch((err) => {
-  console.error("Failed to initialize database:", err);
-  process.exit(1);
-});
+if (require.main === module) {
+  initDatabase().catch((err) => {
+    console.error("Failed to initialize database:", err);
+    process.exit(1);
+  });
+}
