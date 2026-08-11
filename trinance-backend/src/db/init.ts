@@ -5,29 +5,35 @@ import path from "path";
 import { users, plans, newsletters, subscribers, auditLog } from "./seedData";
 
 async function main() {
-  console.log("Checking if database 'trinance_cms' exists...");
-  const adminClient = new Client({
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT || "5432"),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: "postgres",
-  });
+  const hasDatabaseUrl = !!process.env.DATABASE_URL;
 
-  try {
-    await adminClient.connect();
-    const res = await adminClient.query("SELECT 1 FROM pg_database WHERE datname = 'trinance_cms'");
-    if (res.rows.length === 0) {
-      console.log("Database 'trinance_cms' does not exist. Creating it...");
-      await adminClient.query("CREATE DATABASE trinance_cms");
-      console.log("Database 'trinance_cms' created successfully.");
-    } else {
-      console.log("Database 'trinance_cms' already exists.");
+  if (!hasDatabaseUrl) {
+    console.log("Checking if database 'trinance_cms' exists...");
+    const adminClient = new Client({
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT || "5432"),
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: "postgres",
+    });
+
+    try {
+      await adminClient.connect();
+      const res = await adminClient.query("SELECT 1 FROM pg_database WHERE datname = 'trinance_cms'");
+      if (res.rows.length === 0) {
+        console.log("Database 'trinance_cms' does not exist. Creating it...");
+        await adminClient.query("CREATE DATABASE trinance_cms");
+        console.log("Database 'trinance_cms' created successfully.");
+      } else {
+        console.log("Database 'trinance_cms' already exists.");
+      }
+    } catch (err) {
+      console.error("Error checking/creating database:", err);
+    } finally {
+      await adminClient.end();
     }
-  } catch (err) {
-    console.error("Error checking/creating database:", err);
-  } finally {
-    await adminClient.end();
+  } else {
+    console.log("DATABASE_URL detected. Skipping local 'trinance_cms' database creation checks.");
   }
 
   console.log("Initializing database schema...");
