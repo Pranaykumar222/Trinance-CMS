@@ -47,7 +47,7 @@ export async function initDatabase() {
   const userCheck = await pool.query("SELECT COUNT(*) FROM users");
   if (parseInt(userCheck.rows[0].count) > 0) {
     console.log("Database already seeded. Skipping data seeding.");
-    process.exit(0);
+    return;
   }
 
   console.log("Seeding users...");
