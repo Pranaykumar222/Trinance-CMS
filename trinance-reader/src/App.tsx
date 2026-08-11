@@ -10,6 +10,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+const API_BASE = (import.meta as any).env?.VITE_API_URL || "http://localhost:3000";
+
 // Types mapping matching CMS models
 interface ContentBlock {
   id: string;
@@ -427,8 +429,8 @@ function Home() {
     async function fetchData() {
       try {
         const [newslettersRes, usersRes] = await Promise.all([
-          fetch(`http://localhost:3000/api/newsletters/published?_t=${Date.now()}`),
-          fetch(`http://localhost:3000/api/users?_t=${Date.now()}`),
+          fetch(`${API_BASE}/api/newsletters/published?_t=${Date.now()}`),
+          fetch(`${API_BASE}/api/users?_t=${Date.now()}`),
         ]);
         if (!newslettersRes.ok || !usersRes.ok) throw new Error();
         setNewsletters(await newslettersRes.json());
@@ -554,13 +556,13 @@ function PostDetail({ userPlan }: { userPlan: string }) {
   useEffect(() => {
     async function loadPost() {
       try {
-        const res = await fetch(`http://localhost:3000/api/newsletters/${slug}?_t=${Date.now()}`);
+        const res = await fetch(`${API_BASE}/api/newsletters/${slug}?_t=${Date.now()}`);
         if (!res.ok) throw new Error("Article not found");
         const data = await res.json();
         setNewsletter(data);
 
         // Fetch author
-        const authRes = await fetch(`http://localhost:3000/api/users`);
+        const authRes = await fetch(`${API_BASE}/api/users`);
         if (authRes.ok) {
           const users: User[] = await authRes.json();
           const match = users.find((u) => u.id === data.authorId);

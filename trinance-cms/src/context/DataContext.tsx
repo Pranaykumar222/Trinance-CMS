@@ -9,6 +9,7 @@ import {
 } from "@/data/seed";
 import { delay, genId } from "@/lib/api";
 
+const API_BASE = (import.meta as any).env?.VITE_API_URL || "http://localhost:3000";
 interface DataContextValue {
   loading: boolean;
   newsletters: Newsletter[];
@@ -45,11 +46,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     async function loadData() {
       try {
         const [newslettersRes, subscribersRes, plansRes, usersRes, auditRes] = await Promise.all([
-          fetch(`http://localhost:3000/api/newsletters?_t=${Date.now()}`),
-          fetch(`http://localhost:3000/api/subscribers?_t=${Date.now()}`),
-          fetch(`http://localhost:3000/api/plans?_t=${Date.now()}`),
-          fetch(`http://localhost:3000/api/users?_t=${Date.now()}`),
-          fetch(`http://localhost:3000/api/audit?_t=${Date.now()}`),
+          fetch(`${API_BASE}/api/newsletters?_t=${Date.now()}`),
+          fetch(`${API_BASE}/api/subscribers?_t=${Date.now()}`),
+          fetch(`${API_BASE}/api/plans?_t=${Date.now()}`),
+          fetch(`${API_BASE}/api/users?_t=${Date.now()}`),
+          fetch(`${API_BASE}/api/audit?_t=${Date.now()}`),
         ]);
 
         const [newslettersData, subscribersData, plansData, usersData, auditData] = await Promise.all([
@@ -79,7 +80,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const pushAudit: DataContextValue["pushAudit"] = async (entry) => {
     const payload = { ...entry, id: genId("a"), date: new Date().toISOString() };
     try {
-      const res = await fetch("http://localhost:3000/api/audit", {
+      const res = await fetch(`${API_BASE}/api/audit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -97,7 +98,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   );
 
   const saveNewsletter: DataContextValue["saveNewsletter"] = async (n) => {
-    const res = await fetch(`http://localhost:3000/api/newsletters/${n.id}`, {
+    const res = await fetch(`${API_BASE}/api/newsletters/${n.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(n),
@@ -127,7 +128,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
 
   const createNewsletter: DataContextValue["createNewsletter"] = async (n) => {
-    const res = await fetch("http://localhost:3000/api/newsletters", {
+    const res = await fetch(`${API_BASE}/api/newsletters`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(n),
@@ -157,7 +158,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteNewsletter: DataContextValue["deleteNewsletter"] = async (id) => {
-    await fetch(`http://localhost:3000/api/newsletters/${id}`, {
+    await fetch(`${API_BASE}/api/newsletters/${id}`, {
       method: "DELETE",
     });
     setNewsletters((prev) => prev.filter((n) => n.id !== id));
@@ -178,7 +179,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       updatedAt: new Date().toISOString(),
       stats: { opens: 0, clicks: 0, openRate: 0, clickRate: 0, reads: 0 },
     };
-    const res = await fetch("http://localhost:3000/api/newsletters", {
+    const res = await fetch(`${API_BASE}/api/newsletters`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(copy),
@@ -216,7 +217,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       scheduledFor: status === "scheduled" ? scheduledFor ?? src.scheduledFor : null,
       publishDate: status === "published" ? new Date().toISOString() : src.publishDate,
     };
-    await fetch(`http://localhost:3000/api/newsletters/${id}`, {
+    await fetch(`${API_BASE}/api/newsletters/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -237,7 +238,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateSubscriber: DataContextValue["updateSubscriber"] = async (s) => {
-    await fetch(`http://localhost:3000/api/subscribers/${s.id}`, {
+    await fetch(`${API_BASE}/api/subscribers/${s.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(s),
@@ -249,7 +250,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const s = subscribers.find((x) => x.id === id);
     if (!s) return;
     const updated = { ...s, status };
-    await fetch(`http://localhost:3000/api/subscribers/${id}`, {
+    await fetch(`${API_BASE}/api/subscribers/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updated),
@@ -258,14 +259,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteSubscriber: DataContextValue["deleteSubscriber"] = async (id) => {
-    await fetch(`http://localhost:3000/api/subscribers/${id}`, {
+    await fetch(`${API_BASE}/api/subscribers/${id}`, {
       method: "DELETE",
     });
     setSubscribers((prev) => prev.filter((x) => x.id !== id));
   };
 
   const updatePlan: DataContextValue["updatePlan"] = async (p) => {
-    const res = await fetch(`http://localhost:3000/api/plans/${p.id}`, {
+    const res = await fetch(`${API_BASE}/api/plans/${p.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(p),
@@ -285,7 +286,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       status: "invited",
       lastActive: new Date().toISOString(),
     };
-    const res = await fetch("http://localhost:3000/api/users", {
+    const res = await fetch(`${API_BASE}/api/users`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newUser),
@@ -304,7 +305,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateUser: DataContextValue["updateUser"] = async (u) => {
-    const res = await fetch(`http://localhost:3000/api/users/${u.id}`, {
+    const res = await fetch(`${API_BASE}/api/users/${u.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(u),
