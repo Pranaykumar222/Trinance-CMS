@@ -68,7 +68,7 @@ export default function NewsletterEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, role } = useAuth();
-  const { getNewsletter, createNewsletter, saveNewsletter, updateNewsletterStatus, users, pushAudit } = useData();
+  const { getNewsletter, createNewsletter, saveNewsletter, deleteNewsletter, updateNewsletterStatus, users, pushAudit } = useData();
   const isNew = !id;
 
   const [draft, setDraft] = useState<Newsletter>(() => emptyDraft(user.id));
@@ -86,6 +86,30 @@ export default function NewsletterEditor() {
     if (id && !isDataLoaded) {
       const existing = getNewsletter(id);
       if (existing) {
+        const hasPublishAccess = role === "admin" || role === "owner";
+        if (existing.status === "published" && !hasPublishAccess) {
+          const draftId = `${existing.id}_draft`;
+          const existingDraft = getNewsletter(draftId);
+          if (existingDraft) {
+            navigate(`/newsletters/${draftId}/edit`, { replace: true });
+          } else {
+            const clone = {
+              ...structuredClone(existing),
+              id: draftId,
+              status: "draft" as any,
+              title: `${existing.title} (Draft Edit)`,
+              publishDate: null,
+              scheduledFor: null,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            createNewsletter(clone).then(() => {
+              navigate(`/newsletters/${draftId}/edit`, { replace: true });
+            });
+          }
+          return;
+        }
+
         setDraft(structuredClone(existing));
         setSlugTouched(true);
         if (existing.scheduledFor) {
@@ -98,7 +122,7 @@ export default function NewsletterEditor() {
     } else if (!id) {
       setIsDataLoaded(true);
     }
-  }, [id, getNewsletter, isDataLoaded]);
+  }, [id, getNewsletter, isDataLoaded, role, navigate, createNewsletter]);
 
   const set = (patch: Partial<Newsletter>) => setDraft((d) => ({ ...d, ...patch }));
 
@@ -162,17 +186,49 @@ export default function NewsletterEditor() {
 
   const handlePublish = async () => {
     if (!validateBasics()) { setStep(0); return; }
-    await persist({ status: "published", publishDate: new Date().toISOString() });
-    pushAudit({ actorId: user.id, action: "published", target: draft.title });
-    toast.success("Published", { description: `${draft.title} is now live.` });
+    
+    if (draft.id.endsWith("_draft")) {
+      const parentId = draft.id.replace("_draft", "");
+      const cleanTitle = draft.title.replace(" (Draft Edit)", "");
+      const payload = { 
+        ...draft, 
+        id: parentId, 
+        title: cleanTitle, 
+        status: "published" as any, 
+        publishDate: new Date().toISOString() 
+      };
+      await saveNewsletter(payload);
+      await deleteNewsletter(draft.id);
+    } else {
+      await persist({ status: "published", publishDate: new Date().toISOString() });
+    }
+    
+    pushAudit({ actorId: user.id, action: "published", target: draft.title.replace(" (Draft Edit)", "") });
+    toast.success("Published", { description: `${draft.title.replace(" (Draft Edit)", "")} is now live.` });
     navigate("/newsletters");
   };
 
   const handleSchedule = async () => {
     if (!validateBasics()) { setStep(0); return; }
     if (!scheduleAt) { toast.error("Pick a date and time to schedule."); return; }
-    await persist({ status: "scheduled", scheduledFor: new Date(scheduleAt).toISOString() });
-    pushAudit({ actorId: user.id, action: "scheduled", target: draft.title });
+    
+    if (draft.id.endsWith("_draft")) {
+      const parentId = draft.id.replace("_draft", "");
+      const cleanTitle = draft.title.replace(" (Draft Edit)", "");
+      const payload = { 
+        ...draft, 
+        id: parentId, 
+        title: cleanTitle, 
+        status: "scheduled" as any, 
+        scheduledFor: new Date(scheduleAt).toISOString() 
+      };
+      await saveNewsletter(payload);
+      await deleteNewsletter(draft.id);
+    } else {
+      await persist({ status: "scheduled", scheduledFor: new Date(scheduleAt).toISOString() });
+    }
+    
+    pushAudit({ actorId: user.id, action: "scheduled", target: draft.title.replace(" (Draft Edit)", "") });
     toast.success("Scheduled", { description: `Sends ${new Date(scheduleAt).toLocaleString()}` });
     navigate("/newsletters");
   };
