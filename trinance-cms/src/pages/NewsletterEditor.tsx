@@ -236,6 +236,45 @@ export default function NewsletterEditor() {
         })}
       </div>
 
+      {/* Draft Review Banner */}
+      {!isNew && draft.status === "draft" && (role === "admin" || role === "owner") && (
+        <div className="flex flex-col gap-3 border-b border-border bg-card px-6 py-3.5 sm:flex-row sm:items-center sm:justify-between shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-warning/10" style={{ color: "var(--warning)" }}>
+              <CalendarClock className="size-4" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Draft Review Panel</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Created by <strong className="text-foreground">{users.find((u: any) => u.id === draft.authorId)?.name || "Writer/Editor"}</strong>. Review blocks, request changes, or approve for release.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const note = window.prompt("Enter revision feedback note for the author:");
+                if (note !== null) {
+                  pushAudit({ actorId: user.id, action: "revision requested", target: `${draft.title} (Feedback: ${note})` });
+                  toast.success("Revision requested", { description: "Changes request logged in audit log." });
+                  navigate("/newsletters");
+                }
+              }}
+            >
+              Request Changes
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setStep(3)} // Route directly to Step 4 (Access) for publishing
+            >
+              Approve & Publish
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Body: split-screen */}
       <div className="flex min-h-0 flex-1">
         <div className={cn("min-h-0 flex-1 overflow-y-auto", showPreview && step !== 4 ? "lg:max-w-[60%]" : "")}>

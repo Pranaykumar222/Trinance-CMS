@@ -108,7 +108,7 @@ export function Topbar({
                   key={n.id}
                   onClick={() => {
                     if (n.isDraft) {
-                      navigate(`/newsletters/${n.idVal}`);
+                      navigate(`/newsletters/${n.idVal}/edit`);
                     }
                   }}
                   className={cn(
