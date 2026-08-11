@@ -1,7 +1,6 @@
 import { Client } from "pg";
 import pool from "../config/db";
-import fs from "fs";
-import path from "path";
+import { schemaSql } from "./schemaSql";
 import { users, plans, newsletters, subscribers, auditLog } from "./seedData";
 
 export async function initDatabase() {
@@ -37,8 +36,7 @@ export async function initDatabase() {
   }
 
   console.log("Initializing database schema...");
-  const schemaPath = path.join(__dirname, "schema.sql");
-  const schemaSql = fs.readFileSync(schemaPath, "utf-8");
+
 
   await pool.query(schemaSql);
   console.log("Database schema initialized successfully.");
