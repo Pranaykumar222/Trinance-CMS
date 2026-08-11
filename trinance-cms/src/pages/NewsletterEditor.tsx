@@ -146,8 +146,18 @@ export default function NewsletterEditor() {
 
   const handleSaveDraft = async () => {
     if (!validateBasics()) { setStep(0); return; }
-    await persist({ status: draft.status === "published" ? "published" : "draft" });
-    toast.success("Draft saved", { description: draft.title });
+    const hasPublishAccess = role === "admin" || role === "owner";
+    const wasPublished = draft.status === "published";
+    const nextStatus = (wasPublished && hasPublishAccess) ? "published" : "draft";
+    
+    await persist({ status: nextStatus });
+    
+    if (wasPublished && !hasPublishAccess) {
+      toast.success("Draft saved", { description: "Changes saved. Status set to draft for Admin review." });
+      navigate("/newsletters");
+    } else {
+      toast.success("Draft saved", { description: draft.title });
+    }
   };
 
   const handlePublish = async () => {
