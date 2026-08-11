@@ -490,7 +490,14 @@ function StepAccess({ draft, set, canPublish, scheduleAt, setScheduleAt, onPubli
               <p className="text-sm font-semibold">Schedule</p>
               <p className="text-xs text-muted-foreground">Pick a date and time to send.</p>
             </div>
-            <Input type="datetime-local" disabled={!canPublish} value={scheduleAt} onChange={(e) => setScheduleAt(e.target.value)} className="h-8 text-xs" />
+            <Input
+              type="datetime-local"
+              disabled={!canPublish}
+              value={scheduleAt}
+              onChange={(e) => setScheduleAt(e.target.value)}
+              className="h-9 pr-2 text-xs cursor-pointer"
+              style={{ colorScheme: "light dark" }}
+            />
             <Button size="sm" variant="outline" disabled={!canPublish} onClick={onSchedule}>Schedule send</Button>
           </Card>
           <Card className="flex flex-col gap-3 p-4">

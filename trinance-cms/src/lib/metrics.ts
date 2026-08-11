@@ -6,10 +6,11 @@ export function computeMetrics(subscribers: Subscriber[], plans: Plan[], newslet
   const totalSubscribers = freeBase + paidPlanTotal;
   const activePaid = paidPlanTotal;
 
+  const getPlan = (planId: string) => plans.find((p) => p.id === planId) || { price: 0, subscribers: 0 };
   const monthlyRevenue =
-    plans.find((p) => p.id === "monthly")!.price * plans.find((p) => p.id === "monthly")!.subscribers +
-    (plans.find((p) => p.id === "quarterly")!.price / 3) * plans.find((p) => p.id === "quarterly")!.subscribers +
-    (plans.find((p) => p.id === "yearly")!.price / 12) * plans.find((p) => p.id === "yearly")!.subscribers;
+    getPlan("monthly").price * getPlan("monthly").subscribers +
+    (getPlan("quarterly").price / 3) * getPlan("quarterly").subscribers +
+    (getPlan("yearly").price / 12) * getPlan("yearly").subscribers;
 
   const now = new Date("2026-08-07T00:00:00+05:30");
   const publishedThisMonth = newsletters.filter(

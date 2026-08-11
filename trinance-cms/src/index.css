@@ -132,3 +132,15 @@
     scrollbar-width: none;
   }
 }
+
+/* Force webkit calendar picker indicator to be visible and styled for light/dark themes */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  display: block !important;
+  opacity: 1 !important;
+  cursor: pointer;
+  filter: invert(0.5); /* Visible grey indicator in light mode */
+}
+
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2); /* Inverts to bright white indicator in dark mode */
+}
