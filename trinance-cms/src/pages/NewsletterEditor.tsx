@@ -495,7 +495,7 @@ function StepAccess({ draft, set, canPublish, scheduleAt, setScheduleAt, onPubli
               disabled={!canPublish}
               value={scheduleAt}
               onChange={(e) => setScheduleAt(e.target.value)}
-              className="h-9 pr-2 text-xs cursor-pointer"
+              className="h-9 pl-2 pr-1 text-[10.5px] cursor-pointer"
               style={{ colorScheme: "light dark" }}
             />
             <Button size="sm" variant="outline" disabled={!canPublish} onClick={onSchedule}>Schedule send</Button>
