@@ -220,7 +220,7 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       return (
         <div className="block-number-highlight">
           <div className={`highlight-value ${trendClass}`}>
-            {isUp && "+"}
+            {isUp && !String(data.value).startsWith("+") && "+"}
             {data.value}
           </div>
           <div className="highlight-label">{data.label}</div>

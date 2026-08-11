@@ -102,11 +102,13 @@ export default function NewsletterEditor() {
 
   const set = (patch: Partial<Newsletter>) => setDraft((d) => ({ ...d, ...patch }));
 
-  // Auto-generate slug from title until user edits slug
+  // Auto-generate slug from title until user edits slug (only for new newsletters)
   useEffect(() => {
-    if (!slugTouched) set({ slug: slugify(draft.title) });
+    if (isNew && !slugTouched) {
+      set({ slug: slugify(draft.title) });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft.title, slugTouched]);
+  }, [draft.title, slugTouched, isNew]);
 
   const canPublish = CAN.publish(role);
 
