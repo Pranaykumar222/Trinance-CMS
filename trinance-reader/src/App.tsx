@@ -274,24 +274,26 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
 
     case "table":
       return (
-        <table className="block-table">
-          <thead>
-            <tr>
-              {data.headers?.map((h: string, i: number) => (
-                <th key={i}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.rows?.map((row: string[], rIdx: number) => (
-              <tr key={rIdx}>
-                {row.map((cell: string, cIdx: number) => (
-                  <td key={cIdx}>{cell}</td>
+        <div className="block-table-wrapper">
+          <table className="block-table">
+            <thead>
+              <tr>
+                {data.headers?.map((h: string, i: number) => (
+                  <th key={i}>{h}</th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.rows?.map((row: string[], rIdx: number) => (
+                <tr key={rIdx}>
+                  {row.map((cell: string, cIdx: number) => (
+                    <td key={cIdx}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       );
 
     case "chart": {
